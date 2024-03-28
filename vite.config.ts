@@ -1,7 +1,7 @@
-// import { defineConfig } from "vite";
+import { defineConfig } from "vite";
 
 
-// // https://vitejs.dev/config/
-// export default defineConfig({
-//   plugins: [react()],
-// });
+// https://vitejs.dev/config/
+export default defineConfig({
+  
+});
