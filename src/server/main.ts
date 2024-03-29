@@ -35,6 +35,8 @@ mongoose
     process.exit(1);
   });
 
+  console.log("frontent url dev", config.frontend_url_dev)
+  console.log("frontent url prod", config.frontend_url_prod)
 
 // Set up middleware
 app.use(compression());
