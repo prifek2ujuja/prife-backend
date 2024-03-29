@@ -3,7 +3,6 @@ import express from "express";
 import compression from "compression";
 import cors from 'cors'
 import morgan from 'morgan'
-import ViteExpress from "vite-express";
 import mongoose from "mongoose";
 import config from "./config.js";
 import colors from "colors";
@@ -41,7 +40,10 @@ mongoose
 app.use(compression());
 app.use(
   cors({
-    origin: true,
+    origin: [
+      config.frontend_url_dev,
+      config.frontend_url_prod,
+      ],
     credentials: true,
   })
 );
@@ -56,7 +58,7 @@ app.use("/api/users", userRouter)
 app.use("/api/reports", reportRouter)
 
 app.get("/hello", (_, res) => {
-  res.send("Hello Vite + React + TypeScript!");
+  res.send("PRIFE is live!");
 });
 
 // ViteExpress.listen(app, 3000, () =>
