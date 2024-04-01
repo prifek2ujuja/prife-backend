@@ -39,7 +39,7 @@ mongoose
 app.use(compression());
 app.use(
   cors({
-    origin: ["http://localhost:5000", "https://prifek2u-pos.vercel.app/"],
+    origin: ["http://localhost:5000", "https://prifek2u-pos.vercel.app"],
     credentials: true,
   })
 );
