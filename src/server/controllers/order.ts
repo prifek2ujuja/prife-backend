@@ -3,7 +3,7 @@ import Order from '../models/order/index.js';
 import Customer from '../models/customer/index.js';
 import Product from '../models/product/index.js';
 import { DailyProductReport } from '../models/report/index.js';
-import dayjs from 'dayjs'
+
 
 export const listOrders = asyncHandler(async (req, res) => {
     try {
@@ -75,7 +75,7 @@ export const editOrder = asyncHandler(
         const { id } = req.params;
         const updatedOrder = await Order.findByIdAndUpdate(id, req.body, { new: true });
         if (!updatedOrder) {
-            res.status(404).json({ error: 'Order not found' });
+            res.status(404).json({ message: 'Order not found' });
         }
         res.status(200).json(updatedOrder);
     } catch (error) {
@@ -91,7 +91,7 @@ export const deleteOrder = asyncHandler(
         const { id } = req.params;
         const deletedOrder = await Order.findByIdAndDelete(id);
         if (!deletedOrder) {
-             res.status(404).json({ error: 'Order not found' });
+             res.status(404).json({ message: 'Order not found' });
         }
         res.status(204).send(); // No content for successful deletion
     } catch (error) {
