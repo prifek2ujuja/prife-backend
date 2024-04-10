@@ -1,5 +1,6 @@
 import mongoose, { Model, Schema } from 'mongoose';
 import  { OrderItemScheme } from '../orderitem/orderItem.js';
+import { UserScheme } from '../user/index.js';
 
 interface IOrder {
     customerId: Schema.Types.ObjectId;
@@ -9,6 +10,7 @@ interface IOrder {
     delivery: string;
     paymentMode: string;
     refCode: string;
+    salesPerson: typeof UserScheme;
 }
 
 interface IOrderMethods {
@@ -44,6 +46,10 @@ const OrderScheme =  new Schema<IOrder, OrderModel, IOrderMethods>({
         type: String,
        required: false,
     },
+    salesPerson: {
+        type: UserScheme,
+        required: false,
+    }
 },
 {
     timestamps: true,

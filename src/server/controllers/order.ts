@@ -3,6 +3,7 @@ import Order from '../models/order/index.js';
 import Customer from '../models/customer/index.js';
 import Product from '../models/product/index.js';
 import { DailyProductReport } from '../models/report/index.js';
+import User from '../models/user/index.js';
 
 
 export const listOrders = asyncHandler(async (req, res) => {
@@ -17,6 +18,8 @@ export const listOrders = asyncHandler(async (req, res) => {
 export const createOrder = asyncHandler(async (req, res) => {
     const { customer, orderItems, paymentStatus, orderTotal, paymentMode, refCode } = req.body
     let customerId;
+    const user = await User.findById(req.userId)
+    console.log("user: ", user)
     try { // Assuming the data is sent in the request body
         if (customer) {
             const existingCustomer = await Customer.findOne({name: customer.name, phone: customer.phone, email: customer.email})
@@ -38,8 +41,10 @@ export const createOrder = asyncHandler(async (req, res) => {
             paymentStatus,
             orderTotal,
             paymentMode,
-            refCode
+            refCode,
+            salesPerson: user
         });
+
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
@@ -107,6 +112,47 @@ export const ordersGraphData = asyncHandler(
             const sixMonthsAgo = new Date();
             sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+            const sixYearsAgo = new Date();
+            sixYearsAgo.setFullYear(sixYearsAgo.getFullYear() - 6);
+
+            // Aggregate orders for the past 30 days
+            const ordersTotalByDay = await Order.aggregate([
+                {
+                    $match: {
+                    createdAt: { $gte: thirtyDaysAgo } // Filter orders for the last 30 days
+                    }
+                },
+                {
+                    $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, // Group by date
+                    total: { $sum: "$orderTotal" } // Calculate total order value
+                    }
+                },
+                {
+                    $sort: { _id: 1 } // Sort results by date
+                }
+            ])
+
+            const ordersTotalByYear = await Order.aggregate([
+                {
+                    $match: {
+                    createdAt: { $gte: sixYearsAgo } // Filter orders for the last 6 years
+                    }
+                },
+                {
+                    $group: {
+                    _id: { $year: "$createdAt" }, // Group by year
+                    total: { $sum: "$orderTotal" } // Calculate total order value
+                    }
+                },
+                {
+                    $sort: { _id: 1 } // Sort results by year
+                }
+            ])
+
             const ordersTotalByMonth = await Order.aggregate([
                 {
                     $match: {
@@ -127,7 +173,7 @@ export const ordersGraphData = asyncHandler(
                 }
             ]);
 
-            res.json(ordersTotalByMonth);
+            res.json({ ordersTotalByDay, ordersTotalByYear, ordersTotalByMonth });
         } catch (error) {
             console.log("orders graph error: ", error)
             res.status(500).json({message: "Unable to fetch graph data"})

@@ -2,17 +2,23 @@ import asyncHandler from 'express-async-handler'
 import Product from "../models/product/index.js";
 import { faker } from "@faker-js/faker"
 import { DailyProductReport }  from '../models/report/index.js';
+import Image from '../models/image/index.js';
 
 // Create a product document
 export const createProduct = asyncHandler(async (req, res) => {
-    const { productName: name, productPrice: price, productDescription:description, stock } = req.body
+    const { productName: name, productPrice: price, productDescription:description, stock, imageUrl, imagePath } = req.body
     try {
+        const productImage = await Image.create({
+            imagePath,
+            imageUrl,
+        })
         const newProduct = await Product.create({
             name,
             price,
             description,
-            productImage: faker.image.avatar(),
-            stock   
+            productImage:   faker.image.avatar(),
+            stock,
+            productImages: [productImage]   
         })
         res.status(201).json(newProduct)
     } catch (error) {
@@ -36,9 +42,10 @@ export const editProduct = asyncHandler(async (req, res) => {
     const data  = req.body
     console.log(data)
     try {
-        const updatedProduct = await Product.findOneAndUpdate({
-            _id: productId
-        }, data)
+        // const updatedProduct = await Product.findOneAndUpdate({
+        //     _id: productId
+        // }, data)
+        const updatedProduct = await Product.findByIdAndUpdate(productId, data, {new: true})
         // If the sock changes
         if (data.stock !== updatedProduct?.stock) {
             const today = new Date();
@@ -56,6 +63,7 @@ export const editProduct = asyncHandler(async (req, res) => {
                 })
             }
         }
+        // await updatedProduct?.save()
         res.status(200).json(updatedProduct)
     } catch (error) {
         res.status(500).json({message: "Unable to update document"})

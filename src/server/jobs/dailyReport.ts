@@ -17,8 +17,9 @@ const generateFinalDailyReport = async () => {
     productsReport: [],
    })
    const productReports = await DailyProductReport.find({createdAt: { $gte: today }}).select({ _id: 1, product: 1 })
+   
    productReports.forEach(async (report) => {
-        const product = await Product.findById(report).select("stock")
+        const product = await Product.findById(report.product).select("stock")
         const updatedProductReport = await DailyProductReport.findByIdAndUpdate(report._id, {
             closingStock: product?.stock
         })

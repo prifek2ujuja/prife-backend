@@ -20,7 +20,7 @@ interface IUser {
 interface IUserMethods {
   matchPassword(enteredPassword: string) : Promise<boolean>;
 }
-const UserScheme = new Schema<IUser, {}, IUserMethods>(
+export const UserScheme = new Schema<IUser, {}, IUserMethods>(
   {
     userName: {
       type: String,

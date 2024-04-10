@@ -8,7 +8,7 @@ router.get("", isAuthorized,listOrders)
 router.get("/trends", isAuthorized, ordersGraphData)
 router.get("/stats", isAuthorized, getOrderStats);
 router.get("/recent", isAuthorized, getRecentSales)
-router.post("", createOrder)
+router.post("", isAuthorized, createOrder)
 router.put("/:id",isAuthorized, editOrder)
 router.delete("/:id",isAuthorized, deleteOrder)
 

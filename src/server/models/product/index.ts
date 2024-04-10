@@ -1,4 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
+import { ImageScheme } from '../image/index.js';
 
 export const ProductScheme = new Schema({
     name: {
@@ -20,6 +21,9 @@ export const ProductScheme = new Schema({
     productImage: {
         type: String,
         required: true,
+    },
+    productImages: {
+        type: [ImageScheme]
     }
 })
 
