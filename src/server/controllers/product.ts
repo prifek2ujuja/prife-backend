@@ -93,3 +93,14 @@ export const lowStockProducts = asyncHandler(async (req, res) => {
     }
 })
 
+
+
+export const getProductImages = asyncHandler(async (req, res) => {
+    const { productId } = req.params
+    try {
+        const product = await Product.findById(productId).populate('productImages').select('productImages')
+        res.status(200).json(product?.productImages)
+    } catch (error) {
+        res.status(500).json({message: "Unable to get product images"})
+    } 
+})
