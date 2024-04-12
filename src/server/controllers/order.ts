@@ -256,3 +256,31 @@ export const getRecentSales = asyncHandler(async (req, res) => {
         res.status(500).json({"message": "unable to fetch recent sales"})
     }
 })
+
+export const getSalesLeaderBoard = asyncHandler(async (req, res) => {
+    try {
+        const salesLeaders = await Order.aggregate([
+            {
+                $group: {
+                    _id: "$salesPerson",
+                    totalSales: { $sum: "$orderTotal" }
+                }
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "salesPerson"
+                }
+            },
+            {
+                $sort: { totalSales: -1 }
+            }
+        ])
+
+        res.json(salesLeaders).status(200)
+    } catch (error) {
+        res.status(500).json({message: "unable to fetch sales leaders"})
+    }
+})
