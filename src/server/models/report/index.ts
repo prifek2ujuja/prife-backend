@@ -1,27 +1,34 @@
 import mongoose, { Schema } from 'mongoose';
 
-const DailyProductReportScheme = new Schema({
+const DailyProductReportScheme = new Schema(
+  {
     product: {
-        type: Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
     },
     openingStock: {
-        type: Number,
+      type: Number,
     },
     closingStock: {
-        type: Number,
-        default: 0,
+      type: Number,
+      default: 0,
     },
     addedStock: {
-        type: Number,
+      type: Number,
+      default: 0,
+    },
+    removedStock: {
+      type: Number,
+      default: 0,
     },
     sales: {
-        type: Number,
-        default: 0
-    }
-},
-{
-    timestamps: true
-})
+      type: Number,
+      default: 0,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
 export const DailyProductReport = mongoose.model(
     "DailyProductReport",
