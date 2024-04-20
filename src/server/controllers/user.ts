@@ -1,21 +1,21 @@
-import User from '../models/user/index.js'; // Assuming your User model file is in the same directory as your controllers
+import User from "../models/user/index.js"; // Assuming your User model file is in the same directory as your controllers
 import bcrypt from "bcryptjs";
-import asyncHandler from 'express-async-handler'
-import {generateToken, generateRefreshToken} from "../utils/jwt/sign.js"
-import { faker } from '@faker-js/faker';
+import asyncHandler from "express-async-handler";
+import { generateToken, generateRefreshToken } from "../utils/jwt/sign.js";
+import { faker } from "@faker-js/faker";
 import jwt from "jsonwebtoken";
-import config from "../config.js"
+import config from "../config.js";
 
 // Register a new user
-export const registerUser =  asyncHandler(async (req, res) => {
-   const { userName, phoneNumber, password, email, role, status } = req.body;
+export const registerUser = asyncHandler(async (req, res) => {
+  const { userName, phoneNumber, password, email, role, status } = req.body;
   try {
     const findOneUser = await User.findOne({ email });
     if (findOneUser) {
       res.status(400).json({
         message: "User already exists. Would you like to log in instead?",
       });
-      return
+      return;
     }
     await User.create({
       userName,
@@ -40,20 +40,26 @@ export const loginUser = asyncHandler(async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      res.status(404).json({ message: 'User not found' });
-      return
+      res.status(404).json({ message: "User not found" });
+      return;
     }
 
     const isMatch = await user!.matchPassword(password);
 
     if (!isMatch) {
-      res.status(401).json({ message: 'Invalid credentials' });
-      return
+      res.status(401).json({ message: "Invalid credentials" });
+      return;
     }
     // Generate token and send response
-     const accessToken = generateToken({role: user?.role as string, userId: user?._id})
-    user!.refreshToken = generateRefreshToken({role: user?.role as string, userId: user?._id})
-    await user?.save()
+    const accessToken = generateToken({
+      role: user?.role as string,
+      userId: user?._id,
+    });
+    user!.refreshToken = generateRefreshToken({
+      role: user?.role as string,
+      userId: user?._id,
+    });
+    await user?.save();
     res.status(200).json({
       avatar: user.avatar,
       refreshToken: user.refreshToken,
@@ -61,8 +67,8 @@ export const loginUser = asyncHandler(async (req, res) => {
       status: user.status,
       userName: user.userName,
       token: accessToken,
-      id: user._id
-    })
+      id: user._id,
+    });
   } catch (error) {
     res.status(500).json({ message: "unable to login" });
   }
@@ -75,17 +81,16 @@ export const logoutUser = asyncHandler(async (_req, res) => {
     const oneUser = await User.findById(_req.userId, {
       refreshToken: 1,
     });
-    
+
     if (!oneUser) {
-      res.status(404).json({"message": "User not found"})
-      return
+      res.status(404).json({ message: "User not found" });
+      return;
     }
 
     oneUser.refreshToken = null;
     await oneUser.save();
-    res.status(200).json({message: "logged out"});
-    return
-
+    res.status(200).json({ message: "logged out" });
+    return;
   } catch (error) {
     res.status(500).json({ message: "Server error. unable to logout" });
   }
@@ -96,7 +101,7 @@ export const deleteUser = asyncHandler(async (req, res) => {
   try {
     const { id } = req.params;
     await User.findByIdAndDelete(id);
-    res.status(200).json({ message: 'User deleted successfully' });
+    res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Unable to delete user" });
   }
@@ -111,8 +116,8 @@ export const editUserPassword = asyncHandler(async (req, res) => {
     const user = await User.findById(id);
 
     if (!user) {
-      res.status(404).json({ message: 'User not found' });
-      return
+      res.status(404).json({ message: "User not found" });
+      return;
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -120,9 +125,9 @@ export const editUserPassword = asyncHandler(async (req, res) => {
 
     await user.save();
 
-    res.status(200).json({ message: 'Password updated successfully' });
+    res.status(200).json({ message: "Password updated successfully" });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json({ message: "Unable to update password" });
   }
 });
@@ -133,19 +138,19 @@ export const editUser = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const editData = req.body;
 
-    console.log("edit data: ", editData)
+    console.log("edit data: ", editData);
 
     const user = await User.findByIdAndUpdate(id, editData);
 
     if (!user) {
-      res.status(404).json({ message: 'User not found' });
-      return
+      res.status(404).json({ message: "User not found" });
+      return;
     }
     await user.save();
 
-    res.status(200).json({ message: 'User data updated successfully' });
+    res.status(200).json({ message: "User data updated successfully" });
   } catch (error) {
-    console.log("error: ", error)
+    console.log("error: ", error);
     res.status(500).json({ message: "Unable to update user" });
   }
 });
@@ -155,25 +160,24 @@ export const editUser = asyncHandler(async (req, res) => {
 export const getUserProfile = asyncHandler(async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await User.findById(id)
+    const user = await User.findById(id);
     if (!user) {
-      res.status(404).json({"message": "user not found"})
+      res.status(404).json({ message: "user not found" });
     }
     res.status(200).json({
       userName: user?.userName,
       phoneNumber: user?.phoneNumber,
       email: user?.email,
       notifications: user?.notifications,
-      avatar: user?.avatar
-    })
+      avatar: user?.avatar,
+    });
   } catch (error) {
-    console.log("profile error: ", error)
-    res.status(500).json({"message": "unable to get user profile"})
-  } 
-}) 
+    console.log("profile error: ", error);
+    res.status(500).json({ message: "unable to get user profile" });
+  }
+});
 
 // Get a new access token if expired
-
 
 export const handleRefreshToken = asyncHandler(async (req, res) => {
   const { refreshToken } = req.body;
@@ -190,7 +194,7 @@ export const handleRefreshToken = asyncHandler(async (req, res) => {
   }
   try {
     const decoded = jwt.verify(refreshToken, config.refresh_token_secret);
-    
+
     const accessToken = jwt.sign(
       { userId: decoded.userId, role: decoded.role },
       config.access_token_secret,
@@ -207,20 +211,23 @@ export const handleRefreshToken = asyncHandler(async (req, res) => {
 // get all orders
 export const getAllUsers = asyncHandler(async (req, res) => {
   try {
-    const users = await User.find().sort({createdAt: -1})
-    res.json(users).status(200)
+    const users = await User.find().sort({ createdAt: -1 });
+    res.json(users).status(200);
   } catch (error) {
-    console.log("cant fetch users")
-    res.status(500).json({message: "cant fetch users"})
+    console.log("cant fetch users");
+    res.status(500).json({ message: "cant fetch users" });
   }
-})
+});
 
 export const getSalesStats = asyncHandler(async (req, res) => {
   try {
-    
-    
+    const salesLeaders = await User.find()
+      .sort({ ordersCount: -1 })
+      .limit(5)
+      .exec();
+    res.json(salesLeaders).status(200);
   } catch (error) {
-    console.log("cant fetch users")
-    res.status(500).json({message: "cant fetch users"})
+    console.log(error)
+    res.status(500).json({ message: "cant fetch leaderboard" });
   }
- })
+});

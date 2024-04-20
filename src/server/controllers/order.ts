@@ -24,9 +24,9 @@ export const createOrder = asyncHandler(async (req, res) => {
     refCode,
   } = req.body;
   let customerId;
-  const user = await User.findById(req.userId);
-  console.log("user: ", user);
+  
   try {
+    const user = await User.findById(req.userId);
     // Assuming the data is sent in the request body
     if (customer) {
       const existingCustomer = await Customer.findOne({
@@ -83,6 +83,10 @@ export const createOrder = asyncHandler(async (req, res) => {
         await product.save();
       }
     });
+    if (user) {
+      user.ordersCount = user.ordersCount + 1;
+      await user.save();
+    }
     res.status(201).json(createdOrder);
   } catch (error) {
     console.error(error);
@@ -271,6 +275,8 @@ export const getRecentSales = asyncHandler(async (req, res) => {
 
 export const getSalesLeaderBoard = asyncHandler(async (req, res) => {
   try {
+
+  
     const salesLeaders = await Order.aggregate([
       {
         $match: {

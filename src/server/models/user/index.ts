@@ -1,24 +1,25 @@
 /* eslint-disable no-invalid-this */
 import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcryptjs";
-import asyncHandler from 'express-async-handler'
+import asyncHandler from "express-async-handler";
 // import { TransactionsScheme } from './Transactions.js';
 
 interface IUser {
   userName: string;
   email: string;
-  phoneNumber: string,
+  phoneNumber: string;
   password: string;
-  role: string
-  status: string
-  avatar: string
+  role: string;
+  status: string;
+  avatar: string;
   accessToken?: string;
-  notifications: string[]
-  refreshToken: string
+  ordersCount: number;
+  notifications: string[];
+  refreshToken: string;
 }
 
 interface IUserMethods {
-  matchPassword(enteredPassword: string) : Promise<boolean>;
+  matchPassword(enteredPassword: string): Promise<boolean>;
 }
 export const UserScheme = new Schema<IUser, {}, IUserMethods>(
   {
@@ -38,18 +39,22 @@ export const UserScheme = new Schema<IUser, {}, IUserMethods>(
     role: {
       type: String,
       required: true,
-      default: 'admin'
+      default: "admin",
     },
     status: {
       type: String,
       required: true,
-      default: 'active'
+      default: "active",
     },
     avatar: {
       type: String,
     },
     accessToken: {
       type: String || null,
+    },
+    ordersCount: {
+      type: Number,
+      default: 0,
     },
     notifications: {
       type: [String],
@@ -77,4 +82,3 @@ UserScheme.methods.matchPassword = async function (enteredPassword: string) {
 
 const User = mongoose.model("User", UserScheme);
 export default User;
-
