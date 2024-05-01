@@ -54,7 +54,7 @@ export const editProduct = asyncHandler(async (req, res) => {
     const updatedProduct = await Product.findByIdAndUpdate(productId, data, {
       new: true,
     });
-    // If the sock changes
+    // If the only sock changes
     if (data.stock && !data.name) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);

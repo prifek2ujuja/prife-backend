@@ -20,7 +20,7 @@ const generateFinalDailyReport = async () => {
   });
 
   productReports.forEach(async (report) => {
-    const product = await Product.findById(report.product, { stock: 1 });
+    const product = await Product.findById(report.product?._id, { stock: 1 });
     const updatedProductReport = await DailyProductReport.findByIdAndUpdate(
       report._id,
       {
@@ -37,7 +37,7 @@ const generateFinalDailyReport = async () => {
 const scheduleGenerateDailyReport = () => {
   // create cron expression for 8:20 PM
   const cronExpression = "0 21 * * *"; // At 21:00 hours every day
-  const genReport = cron.schedule(cronExpression, generateFinalDailyReport);
+  cron.schedule(cronExpression, generateFinalDailyReport);
 };
 
 export default scheduleGenerateDailyReport;

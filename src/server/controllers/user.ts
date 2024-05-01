@@ -223,7 +223,7 @@ export const getSalesStats = asyncHandler(async (req, res) => {
   try {
     const salesLeaders = await User.find()
       .sort({ ordersCount: -1 })
-      .limit(5)
+      .limit(3)
       .exec();
     res.json(salesLeaders).status(200);
   } catch (error) {
