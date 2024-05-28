@@ -46,7 +46,7 @@ export const registerUser = asyncHandler(async (req, res) => {
 });
 
 // verify email
-const retrievePasswordResetCode = asynHandler(async (_req, res) => {
+const retrievePasswordResetCode = asyncHandler(async (_req, res) => {
   // We need to get the reset code entered by the user
   const { resetCode, phoneNumber } = _req.body;
   // const userEnteredCode = _req.body.userEnteredCode;
@@ -68,7 +68,6 @@ const retrievePasswordResetCode = asynHandler(async (_req, res) => {
   //   res.status(500).json({ message: "Server Error" });
   // }
 });
-
 
 // Login user
 export const loginUser = asyncHandler(async (req, res) => {
