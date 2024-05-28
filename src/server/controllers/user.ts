@@ -5,6 +5,7 @@ import { generateToken, generateRefreshToken } from "../utils/jwt/sign.js";
 import { faker } from "@faker-js/faker";
 import jwt from "jsonwebtoken";
 import config from "../config.js";
+import generateSecretCode from "../utils/generateSecretCode.js";
 
 // Register a new user
 export const registerUser = asyncHandler(async (req, res) => {
@@ -17,7 +18,11 @@ export const registerUser = asyncHandler(async (req, res) => {
       });
       return;
     }
-    await User.create({
+    const secretCode = generateSecretCode();
+
+    //send email at this point
+
+    const user = await User.create({
       userName,
       password,
       phoneNumber,
@@ -26,12 +31,44 @@ export const registerUser = asyncHandler(async (req, res) => {
       status,
       notifications: [],
       avatar: faker.image.avatar(),
+      secretCode,
     });
+
+    //start countdown so that after 2 minutes unset make the cb fn async
+    setTimeout(async () => {
+      await user.updateOne({ $unset: { secretCode } });
+    }, 240000);
+
     res.status(201).json({ status: "created" });
   } catch (error) {
     res.status(500).json({ message: "Unable to create user" });
   }
 });
+
+// verify email
+const retrievePasswordResetCode = asynHandler(async (_req, res) => {
+  // We need to get the reset code entered by the user
+  const { resetCode, phoneNumber } = _req.body;
+  // const userEnteredCode = _req.body.userEnteredCode;
+  try {
+    const user = await User.findOne({ resetCode, phoneNumber });
+    if (user) {
+      res.status(200).json({ message: "OK" });
+    } else {
+      res.status(404).json({ message: "Not Found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong" });
+  }
+
+  //this may not work becz we are simply sending
+  // if (reset) {
+  //   res.status(200).json({ message: "Reset code sent", userEnteredCode });
+  // } else {
+  //   res.status(500).json({ message: "Server Error" });
+  // }
+});
+
 
 // Login user
 export const loginUser = asyncHandler(async (req, res) => {
@@ -227,7 +264,7 @@ export const getSalesStats = asyncHandler(async (req, res) => {
       .exec();
     res.json(salesLeaders).status(200);
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json({ message: "cant fetch leaderboard" });
   }
 });

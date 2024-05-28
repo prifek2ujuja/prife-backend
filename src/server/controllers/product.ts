@@ -98,7 +98,8 @@ export const editProductStock = asyncHandler(async (req, res) => {
             createdAt: { $gte: today },
             product: productId,
           },
-          { $inc: { addedStock: parseInt(stock) } }
+          { $inc: { addedStock: parseInt(stock) } },
+          { upsert: true }
         );
       if (!updatedDailyProductReport) {
         await DailyProductReport.create({
@@ -119,7 +120,8 @@ export const editProductStock = asyncHandler(async (req, res) => {
             createdAt: { $gte: today },
             product: productId,
           },
-          { $inc: { removedStock: parseInt(stock) } }
+          { $inc: { removedStock: parseInt(stock) } },
+          { upsert: true }
         );
       if (!updatedDailyProductReport) {
         await DailyProductReport.create({

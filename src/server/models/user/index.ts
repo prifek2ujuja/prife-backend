@@ -16,6 +16,8 @@ interface IUser {
   ordersCount: number;
   notifications: string[];
   refreshToken: string;
+  emailVerified: boolean;
+  secretCode: number;
 }
 
 interface IUserMethods {
@@ -62,6 +64,13 @@ export const UserScheme = new Schema<IUser, {}, IUserMethods>(
     refreshToken: {
       type: String || null,
     },
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    secretCode: {
+      type: Number,
+    }
   },
   {
     timestamps: true,

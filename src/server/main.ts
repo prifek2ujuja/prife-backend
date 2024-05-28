@@ -11,10 +11,23 @@ import orderRouter from "./routes/order.js";
 import userRouter from "./routes/user.js";
 import reportRouter from "./routes/report.js";
 import scheduleGenerateDailyReport from "./jobs/dailyReport.js";
-import DailyReport, { DailyProductReport } from "./models/report/index.js";
-import Product from "./models/product/index.js";
+import nodemailer from "nodemailer";
 
 const app = express();
+
+//set up nodemailer
+
+let transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    type: "OAuth2",
+    user: process.env.MAIL_USERNAME,
+    pass: process.env.MAIL_PASSWORD,
+    clientId: process.env.OAUTH_CLIENTID,
+    clientSecret: process.env.OAUTH_CLIENT_SECRET,
+    refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+  },
+});
 
 // schedule cron jobs
 scheduleGenerateDailyReport();
