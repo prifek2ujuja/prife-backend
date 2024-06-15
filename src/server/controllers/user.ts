@@ -49,6 +49,7 @@ export const registerUser = asyncHandler(async (req, res) => {
 const retrievePasswordResetCode = asyncHandler(async (_req, res) => {
   // We need to get the reset code entered by the user
   const { resetCode, phoneNumber } = _req.body;
+  // unnecessary comment
   // const userEnteredCode = _req.body.userEnteredCode;
   try {
     const user = await User.findOne({ resetCode, phoneNumber });
