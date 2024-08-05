@@ -172,3 +172,26 @@ export const getProductImages = asyncHandler(async (req, res) => {
     res.status(500).json({ message: "Unable to get product images" });
   }
 });
+
+export const getTopProducts = asyncHandler(async (req, res) => {
+  try {
+    const products = await Product.find({}).sort({ likes: 1 }).limit(4);
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Unable to get top product" });
+  }
+});
+
+export const addLike = asyncHandler(async (req, res) => {
+  const { productId } = req.params;
+  try {
+    await Product.findByIdAndUpdate(productId, {
+      $inc: {
+        likes: 1,
+      },
+    });
+    res.status(200).json({ message: "Added product likes" });
+  } catch (error) {
+    res.status(500).json({ message: "Unable to add product likes" });
+  }
+});
