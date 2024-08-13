@@ -173,12 +173,21 @@ export const getProductImages = asyncHandler(async (req, res) => {
   }
 });
 
-export const getTopProducts = asyncHandler(async (req, res) => {
+export const getPopularProducts = asyncHandler(async (req, res) => {
   try {
     const products = await Product.find({}).sort({ likes: 1 }).limit(4);
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: "Unable to get top product" });
+  }
+});
+
+export const getTherapyDevices = asyncHandler(async (req, res) => {
+  try {
+    const products = await Product.find({ category: "therapy" });
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Unable to get therapy devices" });
   }
 });
 

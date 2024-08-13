@@ -6,9 +6,10 @@ import {
   editProduct,
   editProductStock,
   getProductImages,
-  getTopProducts,
+  getPopularProducts,
   listProducts,
   lowStockProducts,
+  getTherapyDevices,
 } from "../controllers/product.js";
 import { isAuthorized } from "../middleware/index.js";
 
@@ -19,7 +20,8 @@ router.get("", listProducts);
 router.get("/lowstock", isAuthorized, lowStockProducts);
 router.put("/:productId", isAuthorized, editProduct);
 router.post("/like/:productId", addLike);
-router.get("/top", getTopProducts);
+router.get("/popular", getPopularProducts);
+router.get("/therapy", getTherapyDevices);
 router.put("/:productId", isAuthorized, editProduct);
 router.put("/:productId/stock", isAuthorized, editProductStock);
 router.get("/:productId/images", getProductImages);

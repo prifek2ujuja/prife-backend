@@ -31,6 +31,9 @@ export const ProductScheme = new Schema({
   productImages: {
     type: [ImageScheme],
   },
+  category: {
+    type: String,
+  },
 });
 
 const Product = mongoose.model("Product", ProductScheme);
