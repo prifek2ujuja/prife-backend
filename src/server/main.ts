@@ -11,7 +11,7 @@ import orderRouter from "./routes/order.js";
 import userRouter from "./routes/user.js";
 import reportRouter from "./routes/report.js";
 import scheduleGenerateDailyReport from "./jobs/dailyReport.js";
-import nodemailer from "nodemailer";
+
 
 const app = express();
 
