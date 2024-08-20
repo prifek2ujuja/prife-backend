@@ -54,6 +54,7 @@ app.use(
       "http://localhost:5000",
       "http://localhost:5001",
       "https://prifek2u-pos.vercel.app",
+      "https://prifeonlinestore-production.up.railway.app",
     ],
     credentials: true,
   })
