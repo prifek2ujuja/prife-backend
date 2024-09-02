@@ -23,6 +23,7 @@ export const ProductScheme = new Schema({
   },
   benefits: {
     type: [String],
+    default: [],
   },
   productImage: {
     type: String,

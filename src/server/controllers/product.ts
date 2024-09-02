@@ -13,6 +13,7 @@ export const createProduct = asyncHandler(async (req, res) => {
     stock,
     imageUrl,
     imagePath,
+    benefits,
   } = req.body;
   try {
     const productImage = await Image.create({
@@ -26,6 +27,7 @@ export const createProduct = asyncHandler(async (req, res) => {
       productImage: faker.image.avatar(),
       stock,
       productImages: [productImage],
+      benefits
     });
     res.status(201).json(newProduct);
   } catch (error) {

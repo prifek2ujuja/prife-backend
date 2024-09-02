@@ -4,6 +4,10 @@ import Customer from "../models/customer/index.js";
 import Product from "../models/product/index.js";
 import { DailyProductReport } from "../models/report/index.js";
 import User from "../models/user/index.js";
+import axios from "axios";
+import config from "../config.js";
+import { acceptPayment } from "../utils/paystack.js";
+import crypto from "crypto";
 
 export const listOrders = asyncHandler(async (req, res) => {
   try {
@@ -22,9 +26,11 @@ export const createOrder = asyncHandler(async (req, res) => {
     orderTotal,
     paymentMode,
     refCode,
+    delivery,
+    address: deliveryAddress,
   } = req.body;
   let customerId;
-  
+
   try {
     const user = await User.findById(req.userId);
     // Assuming the data is sent in the request body
@@ -53,7 +59,9 @@ export const createOrder = asyncHandler(async (req, res) => {
       orderTotal,
       paymentMode,
       refCode,
-      salesPerson: user,
+      salesPerson: user ? user : undefined,
+      delivery: delivery ? delivery : undefined,
+      deliveryAddress: deliveryAddress ? deliveryAddress : undefined,
     });
 
     const today = new Date();
@@ -275,8 +283,6 @@ export const getRecentSales = asyncHandler(async (req, res) => {
 
 export const getSalesLeaderBoard = asyncHandler(async (req, res) => {
   try {
-
-  
     const salesLeaders = await Order.aggregate([
       {
         $match: {
@@ -311,9 +317,107 @@ export const getSalesLeaderBoard = asyncHandler(async (req, res) => {
         $sort: { totalSales: -1 }, // Sort by totalSales in descending order
       },
     ]);
-    console.log("salesLeaders: ", salesLeaders);
     res.json(salesLeaders).status(200);
   } catch (error) {
     res.status(500).json({ message: "unable to fetch sales leaders" });
+  }
+});
+
+export const processOnlineOrder = asyncHandler(async (req, res) => {
+  const {
+    customer,
+    orderItems,
+    orderTotal,
+    delivery,
+    address: deliveryAddress,
+  } = req.body;
+  let customerId;
+
+  try {
+    console.log("customer: ", customer);
+    // Assuming the data is sent in the request body
+    if (customer) {
+      const existingCustomer = await Customer.findOne({
+        name: customer.name,
+        phone: customer.phone,
+        email: customer.email,
+      });
+      if (existingCustomer) {
+        customerId = existingCustomer._id;
+      } else {
+        const newCustomer = await Customer.create({
+          name: customer.name,
+          phone: customer.phone,
+          // email: customer.email
+        });
+        customerId = newCustomer._id;
+      }
+    }
+    // const customer = Customer.findOne({})
+    const createdOrder = await Order.create({
+      customerId,
+      orderItems,
+      orderTotal,
+      delivery,
+      deliveryAddress: deliveryAddress ? deliveryAddress : undefined,
+    });
+
+    res
+      .status(200)
+      .json({
+        _id: createdOrder._id,
+        orderTotal: createdOrder.orderTotal,
+        customerEmail: customer.email,
+      });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+export const editOrderStatus = asyncHandler(async (req, res) => {
+  const { status, orderId, reference: paystackPaymentRef } = req.body;
+
+  try {
+    const updatedOrder = await Order.findByIdAndUpdate(orderId, {
+      status,
+      paystackPaymentRef,
+    });
+    res.status(200).json(updatedOrder);
+  } catch (error) {
+    res.status(500).json({ message: "unable to change order status" });
+  }
+});
+
+export const processOnlineOrderCallback = asyncHandler(async (req, res) => {
+  //validate event
+  try {
+    const secret = config.paystack_secret_key;
+    const hash = crypto
+      .createHmac("sha512", secret)
+      .update(JSON.stringify(req.body))
+      .digest("hex");
+
+    if (hash == req.headers["x-paystack-signature"]) {
+      // Retrieve the request's body
+
+      const event = req.body;
+      const { status, reference, amount } = event;
+      const order = await Order.findOne({ paystackPaymentRef: reference });
+      if (
+        order &&
+        order.orderTotal === parseInt(amount) &&
+        status === "success"
+      ) {
+        order.status = "processed";
+        order.statusDescription = "payment successful";
+        await order.save();
+
+        res.status(200).json("ok");
+      }
+      // Do something with event
+    }
+  } catch (error) {
+    res.status(500).json({ message: "internal server error" });
   }
 });

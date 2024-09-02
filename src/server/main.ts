@@ -55,6 +55,9 @@ app.use(
       "http://localhost:5001",
       "https://prifek2u-pos.vercel.app",
       "https://prifeonlinestore-production.up.railway.app",
+      "52.31.139.75",
+      "52.49.173.169",
+      "52.214.14.220",
     ],
     credentials: true,
   })

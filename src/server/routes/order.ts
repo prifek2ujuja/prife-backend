@@ -1,16 +1,29 @@
-import express from 'express'
-import { createOrder, deleteOrder, editOrder, getOrderStats, getRecentSales, getSalesLeaderBoard, listOrders, ordersGraphData } from '../controllers/order.js'
-import { isAuthorized } from '../middleware/index.js'
+import express from "express";
+import {
+  createOrder,
+  deleteOrder,
+  editOrder,
+  editOrderStatus,
+  getOrderStats,
+  getRecentSales,
+  getSalesLeaderBoard,
+  listOrders,
+  ordersGraphData,
+  processOnlineOrder,
+} from "../controllers/order.js";
+import { isAuthorized } from "../middleware/index.js";
 
-const router = express.Router()
+const router = express.Router();
 
-router.get("", isAuthorized,listOrders)
-router.get("/trends", isAuthorized, ordersGraphData)
+router.get("", isAuthorized, listOrders);
+router.get("/trends", isAuthorized, ordersGraphData);
 router.get("/stats", isAuthorized, getOrderStats);
-router.get("/recent", isAuthorized, getRecentSales)
-router.post("", isAuthorized, createOrder)
+router.get("/recent", isAuthorized, getRecentSales);
+router.post("", createOrder);
 router.get("/leaderboard", isAuthorized, getSalesLeaderBoard);
-router.put("/:id",isAuthorized, editOrder)
-router.delete("/:id",isAuthorized, deleteOrder)
+router.put("/status", editOrderStatus);
+router.put("/:id", isAuthorized, editOrder);
+router.delete("/:id", isAuthorized, deleteOrder);
+router.post("/process", processOnlineOrder);
 
-export default router
+export default router;
