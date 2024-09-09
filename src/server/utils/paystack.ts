@@ -28,3 +28,11 @@ export const acceptPayment = async (amount: string | number, email: string) => {
     return null;
   }
 };
+
+export const verifyTransaction = async () => {
+  try {
+    
+  } catch (error) {
+    
+  }
+}

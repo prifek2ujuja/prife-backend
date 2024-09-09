@@ -10,6 +10,7 @@ import {
   listProducts,
   lowStockProducts,
   getTherapyDevices,
+  getSupplements,
 } from "../controllers/product.js";
 import { isAuthorized } from "../middleware/index.js";
 
@@ -22,6 +23,7 @@ router.put("/:productId", isAuthorized, editProduct);
 router.post("/like/:productId", addLike);
 router.get("/popular", getPopularProducts);
 router.get("/therapy", getTherapyDevices);
+router.get("/supplement", getSupplements);
 router.put("/:productId", isAuthorized, editProduct);
 router.put("/:productId/stock", isAuthorized, editProductStock);
 router.get("/:productId/images", getProductImages);

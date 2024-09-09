@@ -34,6 +34,7 @@ export const ProductScheme = new Schema({
   },
   category: {
     type: String,
+    default: "supplement",
   },
 });
 

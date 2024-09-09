@@ -14,6 +14,7 @@ export const createProduct = asyncHandler(async (req, res) => {
     imageUrl,
     imagePath,
     benefits,
+    category,
   } = req.body;
   try {
     const productImage = await Image.create({
@@ -27,7 +28,8 @@ export const createProduct = asyncHandler(async (req, res) => {
       productImage: faker.image.avatar(),
       stock,
       productImages: [productImage],
-      benefits
+      benefits,
+      category,
     });
     res.status(201).json(newProduct);
   } catch (error) {
@@ -192,6 +194,18 @@ export const getTherapyDevices = asyncHandler(async (req, res) => {
     res.status(500).json({ message: "Unable to get therapy devices" });
   }
 });
+
+export const getSupplements = asyncHandler(async (req, res) => {
+  console.log("getSupplements");
+  try {
+    const products = await Product.find({ category: "supplement" });
+    console.log(products);
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Unable to get supplements" });
+  }
+});
+
 
 export const addLike = asyncHandler(async (req, res) => {
   const { productId } = req.params;
