@@ -11,6 +11,8 @@ import {
   lowStockProducts,
   getTherapyDevices,
   getSupplements,
+  addStoreStock,
+  productStats,
 } from "../controllers/product.js";
 import { isAuthorized } from "../middleware/index.js";
 
@@ -23,10 +25,13 @@ router.put("/:productId", isAuthorized, editProduct);
 router.post("/like/:productId", addLike);
 router.get("/popular", getPopularProducts);
 router.get("/therapy", getTherapyDevices);
+router.get("/stats", isAuthorized, productStats);
 router.get("/supplement", getSupplements);
 router.put("/:productId", isAuthorized, editProduct);
 router.put("/:productId/stock", isAuthorized, editProductStock);
+router.put("/:productId/store", isAuthorized, addStoreStock);
 router.get("/:productId/images", getProductImages);
 router.delete("/:productId", isAuthorized, deleteProduct);
+
 
 export default router;
