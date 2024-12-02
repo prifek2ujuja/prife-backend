@@ -197,7 +197,7 @@ export const deleteProduct = asyncHandler(async (req, res) => {
 // Get products that are low on stock
 export const lowStockProducts = asyncHandler(async (req, res) => {
    try {
-      const products = await Product.find({ stock: { $lte: 15 } });
+      const products = await Product.find({ inStore: { $lte: 10 } });
       res.status(200).json(products);
    } catch (error) {
       res.status(500).json({ message: "Unable to get products low on stock" });
