@@ -8,6 +8,7 @@ import axios from "axios";
 import config from "../config.js";
 import { acceptPayment } from "../utils/paystack.js";
 import crypto from "crypto";
+import { allFakers } from "@faker-js/faker";
 
 export const listOrders = asyncHandler(async (req, res) => {
   try {
@@ -362,13 +363,11 @@ export const processOnlineOrder = asyncHandler(async (req, res) => {
       deliveryAddress: deliveryAddress ? deliveryAddress : undefined,
     });
 
-    res
-      .status(200)
-      .json({
-        _id: createdOrder._id,
-        orderTotal: createdOrder.orderTotal,
-        customerEmail: customer.email,
-      });
+    res.status(200).json({
+      _id: createdOrder._id,
+      orderTotal: createdOrder.orderTotal,
+      customerEmail: customer.email,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -419,5 +418,83 @@ export const processOnlineOrderCallback = asyncHandler(async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ message: "internal server error" });
+  }
+});
+
+export const filterOrders = asyncHandler(async (req, res) => {
+  /**
+   * Filter orders by status, payment status, date range, sales person
+   */
+
+  const {
+    status,
+    paymentMode,
+    refCode,
+    startDate,
+    endDate,
+    salesPersonId,
+    page,
+    limit,
+  } = req.query;
+
+  if (
+    !status &&
+    !paymentMode &&
+    !refCode &&
+    !startDate &&
+    !endDate &&
+    !salesPersonId
+  ) {
+    res
+      .status(400)
+      .json({ message: "At least one filter parameter must be provided" });
+    return;
+  }
+
+  try {
+    const match: {
+      status?: string;
+      refCode?: string;
+      createdAt?: any;
+      endDate?: string;
+      paymentMode?: string;
+    } = {};
+
+    if (status) {
+      match.status = status as string;
+    }
+
+    if (refCode) {
+      match.refCode = refCode as string;
+    }
+
+    if (paymentMode) {
+      match.paymentMode = paymentMode as string;
+    }
+
+    if (startDate && endDate) {
+      match.createdAt = {
+        $gte: new Date(startDate as string),
+        $lte: new Date(endDate as string),
+      };
+    } else if (startDate && !endDate) {
+      match.createdAt = { $gte: new Date(startDate as string) };
+    } else if (endDate && !startDate) {
+      match.createdAt = { $lte: new Date(endDate as string) };
+    }
+
+    const pipeline = [
+      { $match: match },
+      { $sort: { createdAt: -1 as 1 | -1 } },
+      // { $skip: parseInt(page as string) * parseInt(limit) },
+      // { $limit: parseInt(limit) },
+    ];
+    const orders = await Order.aggregate(pipeline);
+    res.status(200).json(orders);
+    return;
+  } catch (error) {
+    console.error("error on filter orders: ", error);
+    res.status(500).json({ message: "Internal Server Error" });
+    return;
   }
 });

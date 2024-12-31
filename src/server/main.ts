@@ -47,12 +47,12 @@ mongoose
   });
 
 // Set up middleware
-app.use(compression());
+
 app.use(
   cors({
     origin: [
       "http://localhost:5000",
-      "http://localhost:5001",
+      // "http://localhost:5001",
       "https://prifek2u-pos.vercel.app",
       "https://prifeonlinestore-production.up.railway.app",
       "52.31.139.75",
@@ -62,6 +62,7 @@ app.use(
     credentials: true,
   })
 );
+app.use(compression());
 app.use(express.json());
 app.use(morgan("tiny"));
 
@@ -105,5 +106,5 @@ app.get("/hello", (_, res) => {
 const port = process.env.PORT || 4400;
 
 app.listen(port, () => {
-  console.log("Server is listening on port 3000...");
+  console.log(`Server is listening on port ${port}...`);
 });

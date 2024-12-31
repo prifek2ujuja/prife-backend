@@ -4,6 +4,7 @@ import {
   deleteOrder,
   editOrder,
   editOrderStatus,
+  filterOrders,
   getOrderStats,
   getRecentSales,
   getSalesLeaderBoard,
@@ -19,6 +20,7 @@ router.get("", isAuthorized, listOrders);
 router.get("/trends", isAuthorized, ordersGraphData);
 router.get("/stats", isAuthorized, getOrderStats);
 router.get("/recent", isAuthorized, getRecentSales);
+router.get("/filter", isAuthorized, filterOrders);
 router.post("", createOrder);
 router.get("/leaderboard", isAuthorized, getSalesLeaderBoard);
 router.put("/status", editOrderStatus);
