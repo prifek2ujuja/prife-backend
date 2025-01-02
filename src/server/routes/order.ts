@@ -21,7 +21,7 @@ router.get("/trends", isAuthorized, ordersGraphData);
 router.get("/stats", isAuthorized, getOrderStats);
 router.get("/recent", isAuthorized, getRecentSales);
 router.get("/filter", isAuthorized, filterOrders);
-router.post("", createOrder);
+router.post("", isAuthorized, createOrder);
 router.get("/leaderboard", isAuthorized, getSalesLeaderBoard);
 router.put("/status", editOrderStatus);
 router.put("/:id", isAuthorized, editOrder);

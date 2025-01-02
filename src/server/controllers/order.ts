@@ -34,6 +34,10 @@ export const createOrder = asyncHandler(async (req, res) => {
 
   try {
     const user = await User.findById(req.userId);
+
+    console.log("userId: ", req.userId);
+
+    console.log("user: ", user);
     // Assuming the data is sent in the request body
     if (customer) {
       const existingCustomer = await Customer.findOne({
