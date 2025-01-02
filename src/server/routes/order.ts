@@ -6,6 +6,7 @@ import {
   editOrderStatus,
   filterOrders,
   getOrderStats,
+  getProductSalesStats,
   getRecentSales,
   getSalesLeaderBoard,
   listOrders,
@@ -27,5 +28,6 @@ router.put("/status", editOrderStatus);
 router.put("/:id", isAuthorized, editOrder);
 router.delete("/:id", isAuthorized, deleteOrder);
 router.post("/process", processOnlineOrder);
+router.get("/products/stats", getProductSalesStats);
 
 export default router;

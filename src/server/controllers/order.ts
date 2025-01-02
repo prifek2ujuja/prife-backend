@@ -57,6 +57,39 @@ export const createOrder = asyncHandler(async (req, res) => {
       }
     }
     // const customer = Customer.findOne({})
+    
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    orderItems.forEach(async (item) => {
+      const product = await Product.findById(item.product._id);
+      if (product) {
+        // const updatedDailyProductReport =
+        //   await DailyProductReport.findOneAndUpdate(
+        //     {
+        //       createdAt: { $gte: today },
+        //       product: product._id,
+        //     },
+        //     { $inc: { sales: parseInt(item.quantity) } }
+        //   );
+        // if (!updatedDailyProductReport) {
+        //   await DailyProductReport.create({
+        //     product: product._id,
+        //     openingStock: product?.stock,
+        //     addedStock: 0,
+        //     removedStock: 0,
+        //     sales: parseInt(item.quantity),
+        //   });
+        // }
+        if (item.quantity > product.inStore) {
+          res.status(400).json({message: `Not enough ${product.name} to process this order`})
+          return
+        }
+        product.stock = product?.inStore - item.quantity;
+        await product.save();
+      }
+    });
     const createdOrder = await Order.create({
       customerId,
       orderItems,
@@ -67,34 +100,6 @@ export const createOrder = asyncHandler(async (req, res) => {
       salesPerson: user ? user : undefined,
       delivery: delivery ? delivery : undefined,
       deliveryAddress: deliveryAddress ? deliveryAddress : undefined,
-    });
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    orderItems.forEach(async (item) => {
-      const product = await Product.findById(item.product._id);
-      if (product) {
-        const updatedDailyProductReport =
-          await DailyProductReport.findOneAndUpdate(
-            {
-              createdAt: { $gte: today },
-              product: product._id,
-            },
-            { $inc: { sales: parseInt(item.quantity) } }
-          );
-        if (!updatedDailyProductReport) {
-          await DailyProductReport.create({
-            product: product._id,
-            openingStock: product?.stock,
-            addedStock: 0,
-            removedStock: 0,
-            sales: parseInt(item.quantity),
-          });
-        }
-        product.stock = product?.stock - item.quantity;
-        await product.save();
-      }
     });
     if (user) {
       user.ordersCount = user.ordersCount + 1;
@@ -270,6 +275,40 @@ export const getOrderStats = asyncHandler(async (req, res) => {
   }
 });
 
+export const getProductSalesStats = asyncHandler(async (req, res) => {
+  try {
+    const productStats = await Order.aggregate([
+      {
+        $unwind: "$orderItems", // Unwind the orderItems array
+      },
+      {
+        $lookup: {
+          from: "products", // Assuming the name of the products collection is "products"
+          localField: "orderItems.product",
+          foreignField: "_id",
+          as: "productInfo",
+        },
+      },
+      {
+        $unwind: "$productInfo", // Unwind the productInfo array
+      },
+      {
+        $group: {
+          _id: "$productInfo._id",
+          productName: { $first: "$productInfo.name" },
+          totalValue: { $sum: { $multiply: ["$productInfo.price", "$orderItems.quantity"] } },
+        },
+      },
+    ]);
+
+    console.log("product stats: ", productStats);
+
+    res.status(200).json(productStats);
+  } catch (error) {
+    res.status(500).json({ message: "unable to fetch product sales stats" });    
+  }
+})
+
 // Get recent sales
 export const getRecentSales = asyncHandler(async (req, res) => {
   try {
@@ -278,7 +317,7 @@ export const getRecentSales = asyncHandler(async (req, res) => {
 
     const orders = await Order.find({
       createdAt: { $gte: twentyFourHoursAgo },
-    });
+    }).sort({ createdAt: -1 });
 
     res.json(orders).status(200);
   } catch (error) {

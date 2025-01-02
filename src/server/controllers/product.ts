@@ -62,25 +62,25 @@ export const editProduct = asyncHandler(async (req, res) => {
          new: true,
       });
       // If the only sock changes
-      if (data.stock && !data.name) {
-         const today = new Date();
-         today.setHours(0, 0, 0, 0);
-         const productReport = await DailyProductReport.findOne({
-            createdAt: { $gte: today },
-            product: updatedProduct?._id,
-         });
-         if (productReport) {
-            productReport.addedStock = productReport.addedStock + data.stock;
-            await productReport.save();
-         } else {
-            await DailyProductReport.create({
-               product: updatedProduct?._id,
-               openingStock: updatedProduct?.stock,
-               addedStock: data.stock,
-               sakes: 0,
-            });
-         }
-      }
+      // if (data.stock && !data.name) {
+      //    const today = new Date();
+      //    today.setHours(0, 0, 0, 0);
+      //    const productReport = await DailyProductReport.findOne({
+      //       createdAt: { $gte: today },
+      //       product: updatedProduct?._id,
+      //    });
+      //    if (productReport) {
+      //       productReport.addedStock = productReport.addedStock + data.stock;
+      //       await productReport.save();
+      //    } else {
+      //       await DailyProductReport.create({
+      //          product: updatedProduct?._id,
+      //          openingStock: updatedProduct?.stock,
+      //          addedStock: data.stock,
+      //          sakes: 0,
+      //       });
+      //    }
+      // }
       // await updatedProduct?.save()
       res.status(200).json(updatedProduct);
    } catch (error) {
@@ -95,50 +95,57 @@ export const editProductStock = asyncHandler(async (req, res) => {
    try {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
+      console.log("action: ", action);
       if (action === "add") {
          const updatedProduct = await Product.findByIdAndUpdate(productId, {
             $inc: { stock: parseInt(stock) },
          });
-         const updatedDailyProductReport =
-            await DailyProductReport.findOneAndUpdate(
-               {
-                  createdAt: { $gte: today },
-                  product: productId,
-               },
-               { $inc: { addedStock: parseInt(stock) } },
-               { upsert: true }
-            );
-         if (!updatedDailyProductReport) {
-            await DailyProductReport.create({
-               product: productId,
-               openingStock: updatedProduct?.stock,
-               addedStock: parseInt(stock),
-               removedStock: 0,
-               sales: 0,
-            });
+         // const updatedDailyProductReport =
+         //    await DailyProductReport.findOneAndUpdate(
+         //       {
+         //          createdAt: { $gte: today },
+         //          product: productId,
+         //       },
+         //       { $inc: { addedStock: parseInt(stock) } },
+         //       { upsert: true }
+         //    );
+         // if (!updatedDailyProductReport) {
+         //    await DailyProductReport.create({
+         //       product: productId,
+         //       openingStock: updatedProduct?.stock,
+         //       addedStock: parseInt(stock),
+         //       removedStock: 0,
+         //       sales: 0,
+         //    });
+         // }
+      } else if (action === "remove") {
+
+         const product = await Product.findById(productId).select({stock: 1})
+         if (product && stock > product.stock) {
+            res.status(400).json({ message: "Insufficient stock" });
+            return;
          }
-      } else {
-         const updatedProduct = await Product.findByIdAndUpdate(productId, {
-            $dec: { stock: parseInt(stock) },
+         await Product.findByIdAndUpdate(productId, {
+            $inc: { stock: -parseInt(stock) },
          });
-         const updatedDailyProductReport =
-            await DailyProductReport.findOneAndUpdate(
-               {
-                  createdAt: { $gte: today },
-                  product: productId,
-               },
-               { $inc: { removedStock: parseInt(stock) } },
-               { upsert: true }
-            );
-         if (!updatedDailyProductReport) {
-            await DailyProductReport.create({
-               product: productId,
-               openingStock: updatedProduct?.stock,
-               addedStock: 0,
-               removedStock: parseInt(stock),
-               sales: 0,
-            });
-         }
+         // const updatedDailyProductReport =
+         //    await DailyProductReport.findOneAndUpdate(
+         //       {
+         //          createdAt: { $gte: today },
+         //          product: productId,
+         //       },
+         //       { $inc: { removedStock: parseInt(stock) } },
+         //       { upsert: true }
+         //    );
+         // if (!updatedDailyProductReport) {
+         //    await DailyProductReport.create({
+         //       product: productId,
+         //       openingStock: updatedProduct?.stock,
+         //       addedStock: 0,
+         //       removedStock: parseInt(stock),
+         //       sales: 0,
+         //    });
+         // }
       }
       res.status(200).json({ message: "Stock updated" });
    } catch (error) {
@@ -158,6 +165,11 @@ export const addStoreStock = asyncHandler(async (req, res) => {
       if (!product) {
          res.status(404).json({ message: "Product not found" });
          return
+      }
+
+      if (amount > product.stock) {
+         res.status(400).json({ message: "Insufficient back office stock" });
+         return;
       }
 
       const newStoreStock = product.inStore + amount;
