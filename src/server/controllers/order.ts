@@ -317,7 +317,7 @@ export const getRecentSales = asyncHandler(async (req, res) => {
 
     const orders = await Order.find({
       createdAt: { $gte: twentyFourHoursAgo },
-    }).sort({ createdAt: -1 });
+    }).sort({ createdAt: -1 }).limit(5);
 
     res.json(orders).status(200);
   } catch (error) {
