@@ -12,6 +12,18 @@ export const ProductScheme = new Schema({
       type: Number,
       required: true,
    },
+   purchasePrice: {
+      type: Number,
+      required: true,
+   },
+   retailPrice: {
+      type: Number,
+      required: true,
+   },
+   discountPrice: {
+      type: Number,
+      required: true,
+   },
    stock: {
       type: Number,
       required: true,
