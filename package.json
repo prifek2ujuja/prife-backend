@@ -29,7 +29,8 @@
     "node-cron": "^3.0.3",
     "tsx": "^4.3.0",
     "typescript": "^5.3.2",
-    "vite-express": "*"
+    "vite-express": "*",
+    "vite-react-typescript-starter": "file:"
   },
   "devDependencies": {
     "@faker-js/faker": "^8.4.0",

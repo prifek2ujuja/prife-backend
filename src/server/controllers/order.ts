@@ -86,7 +86,7 @@ export const createOrder = asyncHandler(async (req, res) => {
           res.status(400).json({message: `Not enough ${product.name} to process this order`})
           return
         }
-        product.stock = product?.inStore - item.quantity;
+        product.inStore = product?.inStore - item.quantity;
         await product.save();
       }
     });
